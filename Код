@@ -1,0 +1,271 @@
+#include <stdio.h> 
+#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <Windows.h>
+#include <locale.h>
+
+
+#define N1 20
+#define N2 50 
+#define N 100 
+
+struct book { 
+	long long code; 
+	char author[N1]; 
+	char nazknigi[N2];
+	int kolknig; 
+	int narukah; 
+};
+
+
+
+
+int main(void) {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251); 
+	setlocale(LC_ALL, "Rus"); 
+	char arr[N2]; 
+	int menu = 0; 
+	int  provdobal = 1;
+	long long codeudal = 0; 
+	int proveudal = 0; 
+	int infudal = 0;  
+	char searchauthor[N1]; 
+	char searchcode[N];
+	char csv[] = ".csv"; 
+	int a1; 
+	int a2; 
+	int a3; 
+	char supportopen[] = "books.csv"; 
+	char openfile[800];
+
+
+
+
+
+
+	struct book library[N];
+
+
+	strncpy(openfile, supportopen, 10); 
+
+
+	while (menu == 0) {
+		FILE* books;
+
+		books = fopen(openfile, "r");
+
+		printf("База данных:\n");
+		printf("      Уникальный номер              ФИО автора                Название книги    Всего  Используют\n");
+
+		int i = 1;
+		int a = 0;
+		fscanf(books, "%d;", &library[i].code);
+		while (library[i].code > 0) {
+			printf("%16lld", library[i].code);
+			while ((arr[a] = fgetc(books)) != '\n') {
+				if (arr[a] == ';') {
+					arr[a] = '\0';
+					printf("%30s", arr);
+					strncpy(library[i].author, arr, N1);
+					a = 0;
+					break;
+				}
+				else a++;
+			}
+			while ((arr[a] = fgetc(books)) != '\n') {
+				if (arr[a] == ';') {
+					arr[a] = '\0';
+					printf("%30s ", arr);
+					strncpy(library[i].nazknigi, arr, N2);
+					a = 0;
+					break;
+				}
+				else a++;
+			}
+
+			fscanf(books, "%d;%d", &library[i].kolknig, &library[i].narukah);
+			printf("%5d ", library[i].kolknig);
+			printf("%5d\n", library[i].narukah);
+			i++;
+			fscanf(books, "%lld;", &library[i].code);
+		}
+		fclose(books);
+		printf("\n");
+		printf("Выберить действие:\n");
+		printf("1) Добавить новую книгу\n");
+		printf("2) Удалить книгу по уникальным номерам\n");
+		printf("3) информация по уникальному номеру\n");
+		printf("4) Поиск автора\n");
+		printf("5) Сохранить и выйти\n");
+		printf("\n");
+		printf("--->");
+		scanf("%d", &menu);
+		printf("\n");
+		if ((menu != 1) and (menu != 2) and (menu != 3) and (menu != 4) and (menu != 5) and (menu != 6)) {
+			printf("Ошибка! Введите другое значение.");
+			menu = 0;
+			continue;
+		}
+		switch (menu) {
+		case 1:
+			books = fopen(openfile, "w");
+			while (provdobal == 1) { 
+				printf("Введите уникальный номер:");
+				provdobal= 0;
+				scanf("%lld", &library[i].code);
+				if (library[i].code == 0) {
+					printf("Уже существует уникальный номер.\n");
+					provdobal = 1;
+					continue;
+				}
+				for (a1 = 1; a1 < i; a1++) {
+					if (library[i].code == library[a1].code) {
+						provdobal = 1;
+					}
+				}
+				if (provdobal == 1) {
+					printf("Книга с таким уникальным номером уже существует.\n");
+
+				}
+			}
+			provdobal = 1;
+			arr[a] = getchar();
+			printf("Введите автора книги: ");
+			arr[a] = getchar();
+			while (arr[a] != '\n') {
+				a++;
+				arr[a] = getchar();
+			}
+			arr[a] = '\0';
+			strncpy(library[i].author, arr, N1);
+			a = 0;
+			printf("Введите название книги: ");
+			arr[a] = getchar();
+			while (arr[a] != '\n') {
+				a++;
+				arr[a] = getchar();
+			}
+			arr[a] = '\0';
+			strncpy(library[i].nazknigi, arr, N2);
+			a = 0;
+			printf("количество книг: ");
+			scanf("%d", &library[i].kolknig);
+			printf("Выдано книг: ");
+			scanf("%d", &library[i].narukah);
+			for (int i1 = 1; i1 <= i; i1++) {
+				fprintf(books, "%lld;%s;%s;%d;%d\n", library[i1].code, library[i1].author, library[i1].nazknigi, library[i1].kolknig, library[i1].narukah);
+			}
+			fclose(books);
+			menu = 0;
+			printf("Книга добавлена");
+			break;
+		case 2: books = fopen(openfile, "w");
+			while (proveudal == 0) 
+			{ 
+				printf("Введите уникальный номер для удаления");
+				scanf("%lld", &codeudal);
+				if (codeudal == 0) {
+					printf("Книга с таким уникальным номером не найдена.\n");
+					continue;
+				}
+				for (a1 = 1; a1 < i; a1++) {
+					if (codeudal == library[a1].code) {
+						proveudal = 1;
+						infudal = a1;
+					}
+				}
+				if (proveudal == 0) {
+					printf("Книга с таким уникальным номером N не найдена.\n");
+				}
+			}
+			proveudal = 0;
+			i--;
+			for (int i1 = 1; i1 < infudal; i1++) {
+				fprintf(books, "%lld;%s;%s;%d;%d\n", library[i1].code, library[i1].author, library[i1].nazknigi, library[i1].kolknig, library[i1].narukah);
+
+			}
+			for (infudal; infudal < i; infudal++) {
+				library[infudal].code = library[infudal + 1].code;
+				strncpy(library[infudal].author, library[infudal + 1].author, N);
+				strncpy(library[infudal].nazknigi, library[infudal + 1].nazknigi, N);
+				library[infudal].kolknig = library[infudal + 1].kolknig;
+				library[infudal].narukah = library[infudal + 1].narukah;
+				fprintf(books, "%lld;%s;%s;%d;%d\n", library[infudal].code, library[infudal].author, library[infudal].nazknigi
+					, library[infudal].kolknig, library[infudal].kolknig);
+			}
+			fclose(books);
+			library[i].code = NULL;
+			menu = 0;
+			printf("Книга удалена");
+			break;
+			
+		
+
+		case 3: books = fopen(openfile, "r");
+			int j, code;
+			printf("Введите уникальный номер книги, которую хотите найти: ");
+			scanf("%d",  &code);
+			for (int i1 = 0; i1 < 100; i1++) {
+				if (code == library[i1].code) {
+					printf("%lld %s %s %d %d", library[i1].code, library[i1].author, library[i1].nazknigi, library[i1].kolknig, library[i1].narukah); 
+					j = 1;
+					break; 
+				}
+				
+			}
+			if (j != 1) {
+				printf("такого уникального номера нет");
+			}
+			fclose(books);
+			menu = 0;
+			break;
+		
+		case 4: printf("Введите автора, которого хотите найти: ");
+			a = 0;
+			arr[a] = getchar();
+			arr[a] = getchar();
+			while (arr[a] != '\n') {
+				a++;
+				arr[a] = getchar();
+			}
+			arr[a] = '\0';
+			a = 0;
+			strncpy(searchauthor, arr, 30);
+			printf("Книги автора %s\n", searchauthor);
+			printf("      Уникальный номер                ФИО автора                  Название книги         Всего Используют\n");
+			for (int i1 = 1; i1 < i; i1++) {
+				if (strcmp(searchauthor, library[i1].author) == 0) {
+					printf("%16lld%30s%30s%5d%5d\n", library[i1].code, library[i1].author, library[i1].nazknigi, library[i1].kolknig, library[i1].narukah);
+					a++;
+				}
+			}
+			if (a == 0) {
+				printf("Книги автора %s не найдены\n", searchauthor);
+			}
+			a = 0;
+			printf("0) Вернуться в меню\n");
+			printf("\n");
+			printf("--->");
+			scanf("%d", &menu);
+			while (menu != 0) {
+				printf("Ошибка! Введите 0\n");
+				printf("\n");
+				printf("--->");
+				scanf("%d", &menu);
+			}
+			break;
+		case 5: books = fopen(openfile, "w");
+			for (int i1 = 1; i1 < i; i1++) {
+				fprintf(books, "%lld;%s;%s;%d;%d\n", library[i1].code, library[i1].author, library[i1].nazknigi, library[i1].kolknig, library[i1].narukah);
+			}
+			fclose(books);
+			printf("Завершение работы");
+			strncpy(openfile, supportopen, 10);
+			exit;
+			break;
+
+		}
+	}
+}
